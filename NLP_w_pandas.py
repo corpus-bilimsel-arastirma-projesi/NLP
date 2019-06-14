@@ -4,11 +4,6 @@ Created on Sun Jun  2 15:28:22 2019
 
 @author: asuer
 """
-
-
-#blalalalla
-#more blabal
-
 import pandas as pd
 import os
 import json
@@ -30,7 +25,6 @@ import re
 from collections import Counter
 from time import time
 
-from __future__ import unicode_literals
 
 # from sklearn.feature_extraction.stop_words import ENGLISH_STOP_WORDS as stopwords
 from sklearn.metrics import log_loss
@@ -106,20 +100,68 @@ plt.show()
 fil.plot.bar()
 
 
-df['content'] = df['content'].replace({r'[^\x00-\x7F]+':''}, regex=True, inplace=True)
+
 import string
+df['content'] = df['content'].replace({r'[^\x00-\x7F]+':''}, regex=True)
+pattern = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+df['content']=df['content'].str.replace(pattern, ' ')
+pattern2 = re.compile('.jpg://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+df['content']=df['content'].str.replace(pattern2, ' ')
+df['content'] = df['content'].str.replace('[{}]'.format(string.digits), '')
+
+
 df['content'] = df['content'].str.replace('[{}]'.format(string.punctuation), '')
 df['content'] = df['content'] .str.lower()
 df['content'] = df['content'].apply(lambda x: " ".join(x for x in x.split() if x not in sw))
 
 
-
 freq = pd.Series(' '.join(df['content']).split()).value_counts()
 freq=pd.DataFrame(freq)
-freq = freq[(freq < 1)]
+freq = freq[(freq ==1)]
 freq=freq.dropna(how='all')
 
 freq = list(freq.index)
+
+
+import re
+from collections import Counter
+
+def viterbi_segment(text):
+    probs, lasts = [1.0], [0]
+    for i in range(1, len(text) + 1):
+        prob_k, k = max((probs[j] * word_prob(text[j:i]), j)
+                        for j in range(max(0, i - max_word_length), i))
+        probs.append(prob_k)
+        lasts.append(k)
+    words = []
+    i = len(text)
+    while 0 < i:
+        words.append(text[lasts[i]:i])
+        i = lasts[i]
+    words.reverse()
+    return words, probs[-1]
+
+def word_prob(word): return dictionary[word] / total
+def words(text): return re.findall('[a-z]+', text.lower())
+with open('words_dictionary.json') as json_file:  
+    wdic = json.load(json_file) 
+dictionary =  Counter(wdic)
+max_word_length = max(map(len, dictionary))
+total = float(sum(dictionary.values()))
+
+    
+vit=[]
+for i in freq:
+   xx=viterbi_segment(i)
+   vit.append(xx)
+
+cc =pd.DataFrame(vit)
+vv =list(cc[0])
+for i in vv:
+        if len(i) >2: # Only if lists is longer than 4 items
+            print(i)
+
+    
 df['content'] = df['content'].apply(lambda x: " ".join(x for x in x.split() if x not in freq))
 df['content'].head()
 
@@ -179,6 +221,7 @@ plt.figure(figsize=(15, 12))
 plt.imshow(wordcloud, interpolation="bilinear")
 plt.axis('off')
 plt.show()
+
 
 
 
