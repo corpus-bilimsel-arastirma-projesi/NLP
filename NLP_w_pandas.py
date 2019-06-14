@@ -107,9 +107,17 @@ pattern = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a
 df['content']=df['content'].str.replace(pattern, ' ')
 pattern2 = re.compile('.jpg://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
 df['content']=df['content'].str.replace(pattern2, ' ')
+pattern2 = re.compile('.com://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+df['content']=df['content'].str.replace(pattern2, ' ')
+pattern2 = re.compile('.co://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+df['content']=df['content'].str.replace(pattern2, ' ')
+pattern2 = re.compile('html[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+df['content']=df['content'].str.replace(pattern2, ' ')
+pattern2 = re.compile('www[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+df['content']=df['content'].str.replace(pattern2, ' ')
+
+
 df['content'] = df['content'].str.replace('[{}]'.format(string.digits), '')
-
-
 df['content'] = df['content'].str.replace('[{}]'.format(string.punctuation), '')
 df['content'] = df['content'] .str.lower()
 df['content'] = df['content'].apply(lambda x: " ".join(x for x in x.split() if x not in sw))
@@ -121,7 +129,6 @@ freq = freq[(freq ==1)]
 freq=freq.dropna(how='all')
 
 freq = list(freq.index)
-
 
 import re
 from collections import Counter
@@ -156,14 +163,26 @@ for i in freq:
    vit.append(xx)
 
 cc =pd.DataFrame(vit)
+
 vv =list(cc[0])
 for i in vv:
-        if len(i) >2: # Only if lists is longer than 4 items
+        if len(i) >=2: # Only if lists is longer than 4 items
             print(i)
 
-    
+
+''' burada yapacagin, freq ile viti eslestiren bir dictionary yapmak, amacimiz, content icinde freq de olanalri vit ile replace etmek''' 
+
+
+'''bu lsitede olamayan kelimeleri content den cikariyor, biz cikarmak yerine replace edecegiz'''
+
 df['content'] = df['content'].apply(lambda x: " ".join(x for x in x.split() if x not in freq))
 df['content'].head()
+
+''''buraya kadar'''
+
+
+
+  
 
 
 df['word_count'] = df['content'].apply(lambda x: len(str(x).split(" ")))
